@@ -3,7 +3,7 @@ from html import unescape
 
 BASE = 'https://menu.myqrcodemenu.com'
 SLUG = 'the-churroll-caddebostan-193bcd'
-SAVE_DIR = r'C:\Users\ByMED\Desktop\Qr Churroll\site'
+SAVE_DIR = r'C:\Users\ByMED\Desktop\Qr Churroll\docs'
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Accept-Language': 'tr-TR,tr;q=0.9'}
 
 CATEGORIES = [
