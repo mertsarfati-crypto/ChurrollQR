@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<title>The Churroll Caddebostan ~ QR Code Menü</title>
+<meta name="description" content="The Churroll Caddebostan Dijital QR kod restoran menüsü"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;background:#f4f4f4;color:#1a1a1a;min-height:100vh;transition:background .2s,color .2s}
+
+/* HEADER */
+#header-container{position:sticky;top:0;z-index:100;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.header-row{display:flex;align-items:center;justify-content:space-between;padding:10px 16px}
+.logo-container{text-decoration:none}
+.logo-container img{height:48px;width:auto;object-fit:contain;display:block}
+.logo-container img.dark{display:none}
+.theme-toggle{display:flex;align-items:center}
+.theme-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.theme-btn:hover{background:#f0f0f0}
+.theme-btn svg{width:20px;height:20px;fill:#555}
+.theme-btn.dark-btn{display:none}
+.search-row{padding:0 12px 10px}
+.search-box{display:flex;align-items:center;background:#f0f0f0;border-radius:24px;padding:8px 14px;gap:8px}
+.search-box svg{width:15px;height:15px;fill:#999;flex-shrink:0}
+.search-box input{border:none;background:transparent;outline:none;flex:1;font-size:14px;color:#333;width:100%}
+
+/* CATEGORY TABS */
+#home-container{padding-bottom:80px}
+.category-tabs{display:flex;gap:12px;overflow-x:auto;padding:14px 14px 10px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.category-tabs::-webkit-scrollbar{height:3px}
+.category-tabs::-webkit-scrollbar-thumb{background:#ddd;border-radius:3px}
+.cat-tab{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:76px;scroll-snap-align:start;text-decoration:none;color:#333;flex-shrink:0}
+.cat-tab .image-container{width:68px;height:68px;border-radius:50%;overflow:hidden;border:2.5px solid #e8e8e8;transition:border-color .2s}
+.cat-tab .image-container img{width:100%;height:100%;object-fit:cover}
+.cat-tab .text{font-size:10.5px;font-weight:600;text-align:center;color:#555;line-height:1.3}
+.cat-tab:hover .image-container,.cat-tab.active .image-container{border-color:#c8a96e}
+
+/* PRODUCT SECTIONS */
+.category-section{background:#fff;margin:10px 12px;border-radius:14px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.category-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #f2f2f2}
+.cat-thumb{width:42px;height:42px;border-radius:8px;overflow:hidden;flex-shrink:0}
+.cat-thumb img{width:100%;height:100%;object-fit:cover}
+.category-header h2{font-size:17px;font-weight:700;color:#1a1a1a}
+
+/* PRODUCT ITEM */
+.product-item{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid #f5f5f5;align-items:flex-start;cursor:pointer;transition:background .15s}
+.product-item:last-child{border-bottom:none}
+.product-item:hover{background:#fafafa}
+.product-image{width:88px;height:88px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#f0f0f0}
+.product-image img{width:100%;height:100%;object-fit:cover}
+.product-info{flex:1;min-width:0}
+.product-name{font-size:14.5px;font-weight:600;color:#1a1a1a;margin-bottom:3px;line-height:1.3}
+.desc{font-size:12px;color:#888;line-height:1.5;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.product-price{font-size:15px;font-weight:700;margin-top:4px}
+.price{color:#c8a96e}
+.old-price{text-decoration:line-through;color:#bbb;font-size:12px;margin-right:5px;font-weight:400}
+
+/* BOTTOM NAV */
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ebebeb;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+#bottom-nav ul{display:flex;list-style:none;justify-content:space-around;padding:8px 0}
+#bottom-nav li a{display:flex;flex-direction:column;align-items:center;text-decoration:none;padding:4px 14px}
+#bottom-nav .icon svg{width:22px;height:22px;fill:#aaa;transition:fill .15s}
+#bottom-nav li a.active .icon svg{fill:#c8a96e}
+
+/* POPUP */
+.popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-end;justify-content:center}
+.popup-overlay.active{display:flex}
+.popup-card{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;position:relative}
+.popup-close{position:absolute;top:12px;right:12px;background:rgba(240,240,240,.95);border:none;border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;color:#555}
+.popup-img{width:100%;height:230px;object-fit:cover;border-radius:20px 20px 0 0}
+.popup-body{padding:16px 18px 24px}
+.popup-name{font-size:20px;font-weight:700;margin-bottom:8px;color:#1a1a1a}
+.popup-desc{font-size:13.5px;color:#777;line-height:1.65;margin-bottom:14px}
+.popup-price{font-size:22px;font-weight:700;color:#c8a96e}
+
+/* DARK MODE */
+body.dark{background:#161616;color:#e8e8e8}
+body.dark #header-container{background:#1e1e1e;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+body.dark .theme-btn svg{fill:#bbb}
+body.dark .theme-btn:hover{background:#2a2a2a}
+body.dark .theme-btn.dark-btn{display:flex}
+body.dark .theme-btn.light-btn{display:none}
+body.dark .logo-container img.light{display:none}
+body.dark .logo-container img.dark{display:block}
+body.dark .search-box{background:#2a2a2a}
+body.dark .search-box input{color:#e0e0e0}
+body.dark .search-box svg{fill:#777}
+body.dark .cat-tab .text{color:#bbb}
+body.dark .category-section{background:#1e1e1e;box-shadow:0 1px 6px rgba(0,0,0,.3)}
+body.dark .category-header{border-color:#2a2a2a}
+body.dark .category-header h2{color:#e8e8e8}
+body.dark .product-item{border-color:#272727}
+body.dark .product-item:hover{background:#252525}
+body.dark .product-name{color:#e8e8e8}
+body.dark .desc{color:#888}
+body.dark #bottom-nav{background:#1e1e1e;border-color:#2a2a2a}
+body.dark #bottom-nav .icon svg{fill:#555}
+body.dark .popup-card{background:#1e1e1e}
+body.dark .popup-close{background:#2a2a2a;color:#ccc}
+body.dark .popup-name{color:#e8e8e8}
+body.dark .popup-desc{color:#999}
+
+/* CAT GRID */
+#cat-grid-page{background:#f4f4f4;min-height:calc(100vh - 120px);padding-bottom:80px}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}
+.cat-card{position:relative;border-radius:14px;overflow:hidden;cursor:pointer;aspect-ratio:1;background:#ddd;box-shadow:0 2px 10px rgba(0,0,0,.1);-webkit-tap-highlight-color:transparent}
+.cat-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.cat-card:active img,.cat-card:hover img{transform:scale(1.04)}
+.cat-card-label{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:16px;font-weight:700;padding:32px 12px 12px;text-align:center;letter-spacing:.2px}
+/* BACK BUTTON */
+.back-btn{display:none;align-items:center;gap:4px;background:none;border:none;cursor:pointer;font-size:14px;font-weight:600;color:#c8a96e;padding:4px 2px;border-radius:8px;flex-shrink:0}
+.back-btn svg{width:18px;height:18px;fill:#c8a96e}
+.back-btn.visible{display:flex}
+.page-title{display:none;font-size:16px;font-weight:700;color:#1a1a1a;flex:1;text-align:center;padding-right:32px}
+body.dark .page-title{color:#e8e8e8}
+body.dark #cat-grid-page{background:#161616}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;cursor:pointer;transition:opacity .5s ease,visibility .5s ease;-webkit-tap-highlight-color:transparent}
+#splash.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.splash-bg{position:absolute;inset:0;background:linear-gradient(160deg,#fffdf7 0%,#f5ece0 100%);z-index:0}
+.splash-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
+.splash-logo{width:160px;height:160px;object-fit:contain;border-radius:50%;box-shadow:0 8px 32px rgba(200,169,110,.18);margin-bottom:24px;background:#fff;padding:10px}
+.splash-brand{font-size:26px;font-weight:800;letter-spacing:.5px;color:#1a1a1a;margin-bottom:4px;text-align:center}
+.splash-sub{font-size:14px;color:#999;margin-bottom:44px;letter-spacing:2px;text-transform:uppercase}
+.splash-btn{background:#c8a96e;color:#fff;border:none;border-radius:30px;padding:15px 44px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 6px 24px rgba(200,169,110,.4);letter-spacing:.4px;pointer-events:none}
+.splash-tap{font-size:12px;color:#c8a96e;margin-top:18px;animation:splashtap 1.8s ease-in-out infinite;opacity:.7}
+@keyframes splashtap{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+body.dark #splash .splash-bg{background:linear-gradient(160deg,#1a1a1a 0%,#111 100%)}
+body.dark .splash-brand{color:#e8e8e8}
+body.dark .splash-logo{background:#222;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+</style>
+</head>
+<body id="body">
+
+<div id="splash" onclick="openMenu()">
+    <div class="splash-bg"></div>
+    <div class="splash-content">
+        <img class="splash-logo" src="files/logos/0a770888-54ed-43ce-a69a-e30762a665c8a184a7be-d9db-4070-afb6-51ff60bd86e6.jpeg" alt="The Churroll"/>
+        <div class="splash-brand">The Churroll</div>
+        <div class="splash-sub">Caddebostan</div>
+        <div class="splash-btn">Menüyü Görüntüle</div>
+        <div class="splash-tap">&#x25BC; Devam etmek için dokunun &#x25BC;</div>
+    </div>
+</div>
+
+<div id="header-container">
+    <div class="header-row">
+        <button class="back-btn" id="backBtn" onclick="goBack()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M224 480c-8.188 0-16.38-3.125-22.62-9.375l-192-192c-12.5-12.5-12.5-32.75 0-45.25l192-192c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25L77.25 256l169.4 169.4c12.5 12.5 12.5 32.75 0 45.25C240.4 476.9 232.2 480 224 480z"/></svg>Geri</button>
+        <a href="#" class="logo-container" id="headerLogo">
+            <img src="files/logos/0a770888-54ed-43ce-a69a-e30762a665c8a184a7be-d9db-4070-afb6-51ff60bd86e6.jpeg" class="light" alt="The Churroll Caddebostan"/>
+            <img src="files/logos/0a770888-54ed-43ce-a69a-e30762a665c8a184a7be-d9db-4070-afb6-51ff60bd86e6.jpeg" class="dark"  alt="The Churroll Caddebostan"/>
+        </a>
+        <span class="page-title" id="pageTitle"></span>
+        <div class="theme-toggle">
+            <button class="theme-btn light-btn" onclick="setTheme('dark')" title="Karanlık mod">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M480 224h-48c-17.69 0-32 14.33-32 32s14.31 32 32 32H480c17.69 0 32-14.33 32-32S497.7 224 480 224zM256 112c17.67 0 32-14.31 32-32V32c0-17.69-14.33-32-32-32S224 14.31 224 32v48C224 97.69 238.3 112 256 112zM112 256c0-17.67-14.31-32-32-32H32C14.31 224 0 238.3 0 256s14.31 32 32 32h48C97.69 288 112 273.7 112 256zM256 160C202.1 160 160 202.1 160 256c0 53.02 42.98 96 96 96s96-42.98 96-96C352 202.1 309 160 256 160z"/></svg>
+            </button>
+            <button class="theme-btn dark-btn" onclick="setTheme('light')" title="Aydınlık mod">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M32 256c0-123.8 100.3-224 223.8-224c11.36 0 29.7 1.668 40.9 3.746c9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3c9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480C132.1 480 32 379.6 32 256z"/></svg>
+            </button>
+        </div>
+    </div>
+    <div class="search-row">
+        <div class="search-box">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M507.3 484.7l-141.5-141.5C397 306.8 415.1 259.7 415.1 208c0-114.9-93.13-208-208-208S0 93.13 0 208 93.12 416 207.1 416c51.68 0 98.85-18.96 135.2-50.15l141.5 141.5C487.8 510.4 492 512 496 512c8.8 0 16-7.2 16-16 0-4.2-1.6-8.2-4.7-11.3zM208 384C110.1 384 32 305 32 208S110.1 32 208 32s176 79.1 176 176-79.1 176-176 176z"/></svg>
+            <input type="text" id="searchInput" placeholder="Ürünler içinde arama yapın" oninput="filterProducts(this.value)"/>
+        </div>
+    </div>
+</div>
+
+<div id="cat-grid-page" style="display:none">
+    <div class="cat-grid">
+        <div class="cat-card" onclick="openCategory('a9064814-8e51-44a9-8048-fd97291d83d1')">
+            <img src="files/categories/7d85e27d-2254-403a-95f4-ff596f07d45ee1bd1905-c050-421a-a3c9-4962556f8a2e.jpg" alt="Churros" loading="lazy"/>
+            <div class="cat-card-label">Churros</div>
+        </div>
+        <div class="cat-card" onclick="openCategory('65ff6611-aab2-4234-a662-53a5f25accb0')">
+            <img src="files/categories/00213d69-9966-4ffe-8f94-1ac228876ea79b65138c-840f-47c9-bfd2-5bcd8f4bb41e.jpg" alt="Sıcak İçecekler" loading="lazy"/>
+            <div class="cat-card-label">Sıcak İçecekler</div>
+        </div>
+        <div class="cat-card" onclick="openCategory('4dd5330a-5020-4275-bf91-efefa2147af4')">
+            <img src="files/categories/4c8f4a49-7876-4897-85d8-81cb39d679547d30e7f8-3874-4d32-a3e9-7a39491f8755.jpg" alt="Soğuk İçecekler" loading="lazy"/>
+            <div class="cat-card-label">Soğuk İçecekler</div>
+        </div>
+        <div class="cat-card" onclick="openCategory('aa7462f5-1ad8-4a95-a1cf-efea8721b65c')">
+            <img src="files/categories/adac68a4-b7ea-493d-be53-853582609429cd06cffe-9f27-4d52-83d0-c46db9108c81.jpg" alt="Ekstralar" loading="lazy"/>
+            <div class="cat-card-label">Ekstralar</div>
+        </div>
+    </div>
+</div>
+
+<div id="home-container" style="display:none">
+    
+    <section class="category-section" id="cat-a9064814-8e51-44a9-8048-fd97291d83d1">
+        <div class="category-header">
+            <div class="cat-thumb"><img src="files/categories/7d85e27d-2254-403a-95f4-ff596f07d45ee1bd1905-c050-421a-a3c9-4962556f8a2e.jpg" alt="Churros" loading="lazy"/></div>
+            <h2>Churros</h2>
+        </div>
+        <div class="product-list">
+        <div class="product-item" data-name="Klasik Churros (4adet)" data-desc="Tarçın Şekerli yada Sade.<br>Sütlü, bitter yada beyaz dip sos ile servis edilir." data-price="&lt;span class=&quot;price&quot;&gt;250 ₺&lt;/span&gt;" data-img="files/products/53842f4b-d6c4-4264-a283-de39bc1e137261069234-c472-4ea2-ac94-9abb0e891e3f.jpg">
+            <div class="product-image"><img src="files/products/53842f4b-d6c4-4264-a283-de39bc1e137261069234-c472-4ea2-ac94-9abb0e891e3f.jpg" alt="Klasik Churros (4adet)" loading="lazy"/></div>
+            <div class="product-info">
+                <div class="product-name">Klasik Churros (4adet)</div>
+                <div class="desc">Tarçın Şekerli yada Sade.<br>Sütlü, bitter yada beyaz dip sos ile servis edilir.</div>
+                <div class="product-price"><span class="price">250 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Klasik Churros (6adet)" data-desc="Tarçın Şekerli yada Sade.<br>Sütlü, bitter yada beyaz dip sos ile servis edilir." data-price="&lt;span class=&quot;price&quot;&gt;360 ₺&lt;/span&gt;" data-img="files/products/69664609-77f6-4844-813f-7b3b8f47e086f3a18cdc-19b4-4853-baf7-1e9a42cf888f.jpg">
+            <div class="product-image"><img src="files/products/69664609-77f6-4844-813f-7b3b8f47e086f3a18cdc-19b4-4853-baf7-1e9a42cf888f.jpg" alt="Klasik Churros (6adet)" loading="lazy"/></div>
+            <div class="product-info">
+                <div class="product-name">Klasik Churros (6adet)</div>
+                <div class="desc">Tarçın Şekerli yada Sade.<br>Sütlü, bitter yada beyaz dip sos ile servis edilir.</div>
+                <div class="product-price"><span class="price">360 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Dolgulu Churros (5adet)" data-desc="Dolgu çeşitleri:<br>Nutella, Toffee karamel, Frambuaz, Rocco Limon, Mag sos.<br><br><br>Sütlü, bitter yada beyaz dip sos ile servis edilir." data-price="&lt;span class=&quot;price&quot;&gt;320 ₺&lt;/span&gt;" data-img="files/products/dd761d4d-d8ce-4ba4-8545-9d7ded1bc3a0db85df8e-fdb5-49f6-a380-c373e49e561c.jpg">
+            <div class="product-image"><img src="files/products/dd761d4d-d8ce-4ba4-8545-9d7ded1bc3a0db85df8e-fdb5-49f6-a380-c373e49e561c.jpg" alt="Dolgulu Churros (5adet)" loading="lazy"/></div>
+            <div class="product-info">
+                <div class="product-name">Dolgulu Churros (5adet)</div>
+                <div class="desc">Dolgu çeşitleri:<br>Nutella, Toffee karamel, Frambuaz, Rocco Limon, Mag sos.<br><br><br>Sütlü, bitter yada beyaz dip sos ile servis edilir.</div>
+                <div class="product-price"><span class="price">320 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Süslü Churros" data-desc="Nutella dolgulu. Çilek yada muz seçeneği ile servis edilir.<br><br>Sütlü, bitter yada beyaz dip sos ile servis edilir." data-price="&lt;span class=&quot;price&quot;&gt;380 ₺&lt;/span&gt;" data-img="files/products/03cdea26-6e3b-439a-9c6d-d2a7770cc2a11484f679-f335-472d-9ebf-45a0f9a72f7d.jpg">
+            <div class="product-image"><img src="files/products/03cdea26-6e3b-439a-9c6d-d2a7770cc2a11484f679-f335-472d-9ebf-45a0f9a72f7d.jpg" alt="Süslü Churros" loading="lazy"/></div>
+            <div class="product-info">
+                <div class="product-name">Süslü Churros</div>
+                <div class="desc">Nutella dolgulu. Çilek yada muz seçeneği ile servis edilir.<br><br>Sütlü, bitter yada beyaz dip sos ile servis edilir.</div>
+                <div class="product-price"><span class="price">380 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Ballı Churros" data-desc="Sade veya tarçınlı Churro içerisine; mag dolgusu, muz veya çilek üzerine; bal, fındık<br><br>Sütlü, bitter yada beyaz dip sos ile servis edilir." data-price="&lt;span class=&quot;price&quot;&gt;380 ₺&lt;/span&gt;" data-img="files/products/d3e9df12-c293-411c-9dd1-00a5d56573ea78344a36-62ab-4df4-9cce-7423d9bf23aa.jpg">
+            <div class="product-image"><img src="files/products/d3e9df12-c293-411c-9dd1-00a5d56573ea78344a36-62ab-4df4-9cce-7423d9bf23aa.jpg" alt="Ballı Churros" loading="lazy"/></div>
+            <div class="product-info">
+                <div class="product-name">Ballı Churros</div>
+                <div class="desc">Sade veya tarçınlı Churro içerisine; mag dolgusu, muz veya çilek üzerine; bal, fındık<br><br>Sütlü, bitter yada beyaz dip sos ile servis edilir.</div>
+                <div class="product-price"><span class="price">380 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Cup Of The Love" data-desc="Doğranmış Churros, dilimlenmiş muz, çilek, krep kırıkları, Belçika çikolatası" data-price="&lt;span class=&quot;price&quot;&gt;450 ₺&lt;/span&gt;" data-img="files/products/dbacbfc5-9fd7-49e6-a7db-556a22b8ed7bb81ba105-0014-4846-b382-1e7d0d798272.jpg">
+            <div class="product-image"><img src="files/products/dbacbfc5-9fd7-49e6-a7db-556a22b8ed7bb81ba105-0014-4846-b382-1e7d0d798272.jpg" alt="Cup Of The Love" loading="lazy"/></div>
+            <div class="product-info">
+                <div class="product-name">Cup Of The Love</div>
+                <div class="desc">Doğranmış Churros, dilimlenmiş muz, çilek, krep kırıkları, Belçika çikolatası</div>
+                <div class="product-price"><span class="price">450 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="The Churroll Sepeti" data-desc="Doğranmış Churros üzerine beyaz çikolata, sütlü çikolata ile" data-price="&lt;span class=&quot;price&quot;&gt;310 ₺&lt;/span&gt;" data-img="files/products/109f5b1e-eac0-4aa8-bf76-320f3c3daa12d61afecf-6eee-4ac8-94a4-e111b735a251.jpg">
+            <div class="product-image"><img src="files/products/109f5b1e-eac0-4aa8-bf76-320f3c3daa12d61afecf-6eee-4ac8-94a4-e111b735a251.jpg" alt="The Churroll Sepeti" loading="lazy"/></div>
+            <div class="product-info">
+                <div class="product-name">The Churroll Sepeti</div>
+                <div class="desc">Doğranmış Churros üzerine beyaz çikolata, sütlü çikolata ile</div>
+                <div class="product-price"><span class="price">310 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Loops Halka Churros" data-desc="Çikolata sosa batırılmış şekilde servis edilir." data-price="&lt;span class=&quot;price&quot;&gt;230 ₺&lt;/span&gt;" data-img="files/products/77b5761d-516d-4b16-9ced-1c6bcfb910af3785dbf1-065a-47f5-9028-4a1baba8dc08.jpg">
+            <div class="product-image"><img src="files/products/77b5761d-516d-4b16-9ced-1c6bcfb910af3785dbf1-065a-47f5-9028-4a1baba8dc08.jpg" alt="Loops Halka Churros" loading="lazy"/></div>
+            <div class="product-info">
+                <div class="product-name">Loops Halka Churros</div>
+                <div class="desc">Çikolata sosa batırılmış şekilde servis edilir.</div>
+                <div class="product-price"><span class="price">230 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Mini Loops Halka Churros" data-desc="Seçeceğiniz dip sosa batırılarak servis edilir." data-price="&lt;span class=&quot;price&quot;&gt;330 ₺&lt;/span&gt;" data-img="files/products/3da58556-6d5a-456f-acaa-3b4f23e52a4ca08a70c2-3506-4c4b-85c8-d265b686d657.jpg">
+            <div class="product-image"><img src="files/products/3da58556-6d5a-456f-acaa-3b4f23e52a4ca08a70c2-3506-4c4b-85c8-d265b686d657.jpg" alt="Mini Loops Halka Churros" loading="lazy"/></div>
+            <div class="product-info">
+                <div class="product-name">Mini Loops Halka Churros</div>
+                <div class="desc">Seçeceğiniz dip sosa batırılarak servis edilir.</div>
+                <div class="product-price"><span class="price">330 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Berry Chocolate" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;300 ₺&lt;/span&gt;" data-img="files/products/81f6cda4-c87e-471d-89d5-4c14bc8fdb12e053649e-1d90-4502-bcae-cc1889037c3c.jpg">
+            <div class="product-image"><img src="files/products/81f6cda4-c87e-471d-89d5-4c14bc8fdb12e053649e-1d90-4502-bcae-cc1889037c3c.jpg" alt="Berry Chocolate" loading="lazy"/></div>
+            <div class="product-info">
+                <div class="product-name">Berry Chocolate</div>
+                
+                <div class="product-price"><span class="price">300 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Sweety" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;380 ₺&lt;/span&gt;" data-img="files/products/be14b6f1-2c83-4dde-bad1-f7929d255bed73d31558-8b57-4938-9dcb-274c980dc637.jpg">
+            <div class="product-image"><img src="files/products/be14b6f1-2c83-4dde-bad1-f7929d255bed73d31558-8b57-4938-9dcb-274c980dc637.jpg" alt="Sweety" loading="lazy"/></div>
+            <div class="product-info">
+                <div class="product-name">Sweety</div>
+                
+                <div class="product-price"><span class="price">380 ₺</span></div>
+            </div>
+        </div>
+        </div>
+    </section>
+    <section class="category-section" id="cat-65ff6611-aab2-4234-a662-53a5f25accb0">
+        <div class="category-header">
+            <div class="cat-thumb"><img src="files/categories/00213d69-9966-4ffe-8f94-1ac228876ea79b65138c-840f-47c9-bfd2-5bcd8f4bb41e.jpg" alt="Sıcak İçecekler" loading="lazy"/></div>
+            <h2>Sıcak İçecekler</h2>
+        </div>
+        <div class="product-list">
+        <div class="product-item" data-name="Latte" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;160 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Latte</div>
+                
+                <div class="product-price"><span class="price">160 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Americano" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;140 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Americano</div>
+                
+                <div class="product-price"><span class="price">140 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Sütlü Americano" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;160 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Sütlü Americano</div>
+                
+                <div class="product-price"><span class="price">160 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Çay" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;50 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Çay</div>
+                
+                <div class="product-price"><span class="price">50 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Türk Kahvesi" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;100 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Türk Kahvesi</div>
+                
+                <div class="product-price"><span class="price">100 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Espresso" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;100 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Espresso</div>
+                
+                <div class="product-price"><span class="price">100 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Sıcak Çikolata" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;170 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Sıcak Çikolata</div>
+                
+                <div class="product-price"><span class="price">170 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Büyük Çay" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;80 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Büyük Çay</div>
+                
+                <div class="product-price"><span class="price">80 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Ice Latte" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;160 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Ice Latte</div>
+                
+                <div class="product-price"><span class="price">160 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Ice Americano" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;140 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Ice Americano</div>
+                
+                <div class="product-price"><span class="price">140 ₺</span></div>
+            </div>
+        </div>
+        </div>
+    </section>
+    <section class="category-section" id="cat-4dd5330a-5020-4275-bf91-efefa2147af4">
+        <div class="category-header">
+            <div class="cat-thumb"><img src="files/categories/4c8f4a49-7876-4897-85d8-81cb39d679547d30e7f8-3874-4d32-a3e9-7a39491f8755.jpg" alt="Soğuk İçecekler" loading="lazy"/></div>
+            <h2>Soğuk İçecekler</h2>
+        </div>
+        <div class="product-list">
+        <div class="product-item" data-name="Soda" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;50 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Soda</div>
+                
+                <div class="product-price"><span class="price">50 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Ice Tea" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;90 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Ice Tea</div>
+                
+                <div class="product-price"><span class="price">90 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Coca Cola" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;90 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Coca Cola</div>
+                
+                <div class="product-price"><span class="price">90 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Coca Cola Zero" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;90 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Coca Cola Zero</div>
+                
+                <div class="product-price"><span class="price">90 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Su" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;30 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Su</div>
+                
+                <div class="product-price"><span class="price">30 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Süt" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;70 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Süt</div>
+                
+                <div class="product-price"><span class="price">70 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Limonata" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;130 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Limonata</div>
+                
+                <div class="product-price"><span class="price">130 ₺</span></div>
+            </div>
+        </div>
+        </div>
+    </section>
+    <section class="category-section" id="cat-aa7462f5-1ad8-4a95-a1cf-efea8721b65c">
+        <div class="category-header">
+            <div class="cat-thumb"><img src="files/categories/adac68a4-b7ea-493d-be53-853582609429cd06cffe-9f27-4d52-83d0-c46db9108c81.jpg" alt="Ekstralar" loading="lazy"/></div>
+            <h2>Ekstralar</h2>
+        </div>
+        <div class="product-list">
+        <div class="product-item" data-name="Klasik Churros (1adet)" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;70 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Klasik Churros (1adet)</div>
+                
+                <div class="product-price"><span class="price">70 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Dolgulu Churros (1adet)" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;80 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Dolgulu Churros (1adet)</div>
+                
+                <div class="product-price"><span class="price">80 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Süslü Churros (1adet)" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;130 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Süslü Churros (1adet)</div>
+                
+                <div class="product-price"><span class="price">130 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Ballı Churros (1adet)" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;130 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Ballı Churros (1adet)</div>
+                
+                <div class="product-price"><span class="price">130 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Sütlü Çikolata (20ml)" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;80 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Sütlü Çikolata (20ml)</div>
+                
+                <div class="product-price"><span class="price">80 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Beyaz Çikolata (20ml)" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;80 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Beyaz Çikolata (20ml)</div>
+                
+                <div class="product-price"><span class="price">80 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Bitter Çikolata (20ml)" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;80 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Bitter Çikolata (20ml)</div>
+                
+                <div class="product-price"><span class="price">80 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Çilek" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;100 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Çilek</div>
+                
+                <div class="product-price"><span class="price">100 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Muz" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;100 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Muz</div>
+                
+                <div class="product-price"><span class="price">100 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Nutella (20ml)" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;80 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Nutella (20ml)</div>
+                
+                <div class="product-price"><span class="price">80 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Fındık" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;90 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Fındık</div>
+                
+                <div class="product-price"><span class="price">90 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Fıstık" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;90 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Fıstık</div>
+                
+                <div class="product-price"><span class="price">90 ₺</span></div>
+            </div>
+        </div>
+        <div class="product-item" data-name="Dondurma" data-desc="" data-price="&lt;span class=&quot;price&quot;&gt;90 ₺&lt;/span&gt;" data-img="">
+            
+            <div class="product-info">
+                <div class="product-name">Dondurma</div>
+                
+                <div class="product-price"><span class="price">90 ₺</span></div>
+            </div>
+        </div>
+        </div>
+    </section>
+</div>
+
+<nav id="bottom-nav">
+    <ul>
+        <li><a href="#" class="active"><div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M570.6 244l-58.6-51.87V48c0-8.844-7.156-16-16-16h-96c-8.844 0-16 7.156-16 16v36.37L298.6 4c-6.094-5.312-15.09-5.312-21.19 0l-272 240C1.832 247.2 0 251.6 0 256c0 8.9 7.2 16 16 16 3.8 0 7.5-1.3 10.5-4L64 234.1V432c0 44.1 35.9 80 80 80h288c44.1 0 80-35.9 80-80V234.1L549.4 268c3.1 2.7 6.8 4 10.6 4 8.7 0 16-7.1 16-16 0-4.4-1.8-8.8-5.4-12zM336 480h-96V320h96v160zm144-48c0 26.5-21.5 48-48 48h-64V314.6C368 300 356 288 341.6 288H235c-14.4 0-26.4 12-26.4 26.6V480H144c-26.5 0-48-21.5-48-48V208l192-169.6L480 208v224z"/></svg></div></a></li>
+        <li><a href="#"><div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 480c-123.5 0-224-100.5-224-224S132.5 32 256 32s224 100.5 224 224-100.5 224-224 224zm98.1-185.9L272 246.8V112c0-8.8-7.2-16-16-16s-16 7.2-16 16v144c0 5.7 3 11 8 13.9l90.1 52c2.5 1.4 5.2 2.1 7.9 2.1 5.5 0 10.9-2.9 13.9-8 4.3-7.7 1.7-17.4-5.8-21.9z"/></svg></div></a></li>
+        <li><a href="#"><div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 473.806 473.806"><path d="M374.456 293.506c-9.7-10.1-21.4-15.5-33.8-15.5-12.3 0-24.1 5.3-34.2 15.4l-31.6 31.5c-2.6-1.4-5.2-2.7-7.7-4-3.6-1.8-7-3.5-9.9-5.3-29.6-18.8-56.5-43.3-82.3-75-12.5-15.8-20.9-29.1-27-42.6 8.2-7.5 15.8-15.3 23.2-22.8 2.8-2.8 5.6-5.7 8.4-8.5 21-21 21-48.2 0-69.2l-27.3-27.3c-3.1-3.1-6.3-6.3-9.3-9.5-6-6.2-12.3-12.6-18.8-18.6-9.7-9.6-21.3-14.7-33.5-14.7s-24 5.1-34 14.7l-34 34.3c-12.8 12.8-20.1 28.4-21.7 46.5-2.4 29.2 6.2 56.4 12.8 74.2 16.2 43.7 40.4 84.2 76.5 127.6 43.8 52.3 96.5 93.6 156.7 122.7 23 10.9 53.7 23.8 88 26 2.1.1 4.3.2 6.3.2 23.1 0 42.5-8.3 57.7-24.8 5.2-6.3 11.2-12 17.5-18.1 4.3-4.1 8.7-8.4 13-12.9 9.9-10.3 15.1-22.3 15.1-34.6 0-12.4-5.3-24.3-15.4-34.3l-55.1-55z"/></svg></div></a></li>
+    </ul>
+</nav>
+
+<div class="popup-overlay" id="popup" onclick="closeOnOverlay(event)">
+    <div class="popup-card" id="popupCard">
+        <button class="popup-close" onclick="closePopup()">&#x2715;</button>
+        <img id="popupImg" class="popup-img" src="" alt="" style="display:none"/>
+        <div class="popup-body">
+            <div class="popup-name" id="popupName"></div>
+            <div class="popup-desc" id="popupDesc"></div>
+            <div class="popup-price" id="popupPrice"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+var CAT_NAMES = {"a9064814-8e51-44a9-8048-fd97291d83d1":"Churros","65ff6611-aab2-4234-a662-53a5f25accb0":"Sıcak İçecekler","4dd5330a-5020-4275-bf91-efefa2147af4":"Soğuk İçecekler","aa7462f5-1ad8-4a95-a1cf-efea8721b65c":"Ekstralar"};
+function openMenu() {
+    document.getElementById('splash').classList.add('hidden');
+    document.getElementById('cat-grid-page').style.display = 'block';
+    document.body.style.overflow = '';
+}
+function openCategory(catId) {
+    document.getElementById('cat-grid-page').style.display = 'none';
+    document.getElementById('home-container').style.display = 'block';
+    document.querySelectorAll('.category-section').forEach(function(s) {
+        s.style.display = s.id === 'cat-'+catId ? '' : 'none';
+    });
+    document.getElementById('backBtn').classList.add('visible');
+    document.getElementById('headerLogo').style.display = 'none';
+    document.getElementById('pageTitle').textContent = CAT_NAMES[catId] || '';
+    document.getElementById('pageTitle').style.display = 'block';
+    window.scrollTo(0, 0);
+}
+function goBack() {
+    document.getElementById('home-container').style.display = 'none';
+    document.getElementById('cat-grid-page').style.display = 'block';
+    document.getElementById('backBtn').classList.remove('visible');
+    document.getElementById('headerLogo').style.display = '';
+    document.getElementById('pageTitle').style.display = 'none';
+    document.querySelectorAll('.product-item').forEach(function(el){ el.style.display = ''; });
+    document.getElementById('searchInput').value = '';
+    window.scrollTo(0, 0);
+}
+document.body.style.overflow = 'hidden';
+
+function setTheme(mode) {
+    document.getElementById('body').className = mode;
+    localStorage.setItem('myqrTheme', mode);
+}
+(function() {
+    var saved = localStorage.getItem('myqrTheme') ||
+        (window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+    if (saved === 'dark') setTheme('dark');
+})();
+
+function filterProducts(q) {
+    q = q.trim().toLowerCase();
+    document.querySelectorAll('.product-item').forEach(function(el) {
+        var name = el.querySelector('.product-name').textContent.toLowerCase();
+        var desc = el.querySelector('.desc') ? el.querySelector('.desc').textContent.toLowerCase() : '';
+        el.style.display = (!q || name.includes(q) || desc.includes(q)) ? '' : 'none';
+    });
+    document.querySelectorAll('.category-section').forEach(function(sec) {
+        var any = Array.from(sec.querySelectorAll('.product-item')).some(function(i) { return i.style.display !== 'none'; });
+        sec.style.display = any ? '' : 'none';
+    });
+}
+
+document.querySelectorAll('.cat-tab').forEach(function(tab) {
+    tab.addEventListener('click', function(e) {
+        e.preventDefault();
+        var target = document.querySelector(tab.getAttribute('href'));
+        if (!target) return;
+        var offset = document.getElementById('header-container').offsetHeight + 8;
+        window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset - offset, behavior: 'smooth' });
+    });
+});
+
+var sections = document.querySelectorAll('.category-section');
+window.addEventListener('scroll', function() {
+    var scrollY = window.pageYOffset + document.getElementById('header-container').offsetHeight + 60;
+    var current = '';
+    sections.forEach(function(sec) { if (sec.offsetTop <= scrollY) current = sec.id; });
+    document.querySelectorAll('.cat-tab').forEach(function(tab) {
+        tab.classList.toggle('active', tab.getAttribute('href') === '#' + current);
+    });
+}, { passive: true });
+
+document.querySelectorAll('.product-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+        var img = item.dataset.img;
+        var pi = document.getElementById('popupImg');
+        document.getElementById('popupName').textContent = item.dataset.name;
+        document.getElementById('popupDesc').innerHTML   = item.dataset.desc;
+        document.getElementById('popupPrice').innerHTML  = item.dataset.price;
+        if (img) { pi.src = img; pi.style.display = 'block'; } else { pi.style.display = 'none'; }
+        document.getElementById('popup').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    });
+});
+function closePopup() {
+    document.getElementById('popup').classList.remove('active');
+    document.body.style.overflow = '';
+}
+function closeOnOverlay(e) { if (e.target === document.getElementById('popup')) closePopup(); }
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePopup(); });
+</script>
+</body>
+</html>
